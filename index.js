@@ -44,3 +44,5 @@ download.on("completed", function(output) {
 });
 
 download.start();
+
+console.log(process.cwd());
