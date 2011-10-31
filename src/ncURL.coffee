@@ -37,14 +37,14 @@ class ncURL extends EventEmitter
         ]
     
     start: ->
-        statsData = ""
         curl = spawn "curl", ["-o", @_output, @_url]
-        _registerEventHandlers.call @, curl, statsData
+        _registerEventHandlers.call @, curl
 
     ### Private ###
     
-    _registerEventHandlers = (curl, statsData) ->
+    _registerEventHandlers = (curl) ->
         self = this
+        statsData = ""
         
         curl.stdout.on "end", () ->
             # TODO: need to test if it gets called when failure
