@@ -15,5 +15,8 @@
     "commander": ">=0.2.1",
     "colors": "*"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "bin": {
+    "ncurl": "./index.js"
+  }
 }
