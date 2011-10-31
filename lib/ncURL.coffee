@@ -1,28 +1,66 @@
+fs = require "fs"
+spawn = require("child_process").spawn
+EventEmitter = require('events').EventEmitter
+
 parser = require "./ncURL_parser"
 STATS = parser.STATS
 
-fs = require "fs"
-spawn = require("child_process").spawn
+###
+    An instance of ncURL is not supposed to be re-used,
+    meaning that one instance should be created for one task
+###
+class ncURL extends EventEmitter
+  
+    constructor: (url, output) ->
+        @_url = url
+        @_output = output
 
-testUrl = "http://www.lopers.net/students/p/pedersendm/images/USA%20Map%20Only.jpg"
-output = "/Users/mowang/Desktop/holly.jpg"
+        # TotalPercentage   : 0
+        # Total             : 1
+        # ReceivedPercentage: 2
+        # Received          : 3
+        # XferdPercentage   : 4
+        # Xferd             : 5
+        # AverageDload      : 6
+        # SpeedUpload       : 7
+        # TimeTotal         : 8
+        # TimeSpent         : 9
+        # TimeLeft          : 10
+        # CurrentSpeed      : 11
+        @_statsFilter = [
+            STATS.Total, 
+            STATS.ReceivedPercentage, 
+            STATS.Received, 
+            STATS.AverageDload,
+            STATS.TimeLeft,
+            STATS.CurrentSpeed
+        ]
+    
+    start: ->
+        statsData = ""
+        curl = spawn "curl", ["-o", @_output, @_url]
+        _registerEventHandlers.call @, curl, statsData
 
-curl = spawn "curl", ["-o", output, testUrl] 
+    ### Private ###
+    
+    _registerEventHandlers = (curl, statsData) ->
+        self = this
+        
+        curl.stdout.on "end", () ->
+            console.log "stdout end"
 
-curl.stdout.on "data", (data) ->
-    console.log "stdout #{data}"
+        curl.stderr.setEncoding "utf8"
+        curl.stderr.on "data", (data) ->
+            statsData += data
+            arr = statsData.split "\r"
+            lastStatsStr = arr[arr.length-1]
+            statsInfo = parser.parseStats lastStatsStr, self._statsFilter
+            self.emit "statsUpdated", statsInfo if statsInfo?
 
-curl.stdout.on "end", () ->
-    console.log "stdout end"
+        curl.on "exit", (code)->
+            console.log code
 
-statsData = ""
-curl.stderr.setEncoding "utf8"
-curl.stderr.on "data", (data) ->
-    statsData += data
-    arr = statsData.split "\r"
-    lastStatsStr = arr[arr.length-1]
-    statsInfo = parser.parseStats lastStatsStr, STATS.CurrentSpeed, STATS.ReceivedPercentage, STATS.Received, STATS.Total
-    console.log statsInfo if statsInfo?
 
-curl.on "exit", (code)->
-    console.log code  
+### exports ###
+
+exports.ncURL = ncURL

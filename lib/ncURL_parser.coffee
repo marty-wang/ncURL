@@ -19,17 +19,29 @@ STATS_PATTERN = /[a-zA-Z0-9:-]+/g
 
 ###
     get the stat info based on stats string and stat type
-    return either an array of all the stats or the specified one of string type or null if otherwise
+    return either an object of all the stats or the specified ones or null if otherwise
     example:
         statsStr = "100 3517k  100 3517k    0     0   215k      0  0:00:16  0:00:16 --:--:-- 47546"
-        parseStats statsStr, STATS.CurrentSpeed, STATS.ReceivedPercentage, STATS.Received, STATS.Total
+        parseStats statsStr, [STATS.CurrentSpeed, STATS.ReceivedPercentage, STATS.Received, STATS.Total]
 ###
-parseStats = (statsStr = "", stats...) ->
+parseStats = (statsStr = "", stats) ->
     statsArr = statsStr.match STATS_PATTERN
 
     return null if not statsArr? or statsArr.length < STATS_COUNT
-    return statsArr unless stats?
-    statsArr[stat] for stat in stats
+
+    stats = [0..STATS_COUNT-1] if not stats? or stats.length <= 0
+    info = {}
+    for stat in stats
+        info[stat] = statsArr[stat] if _isInt(stat) && 0 <= stat < STATS_COUNT
+    info
+
+
+### Private ###
+
+_isInt = (n) ->
+    typeof n is 'number' && n % 1 == 0;
+
+### exports ###
 
 exports.parseStats = parseStats
 exports.STATS = STATS
