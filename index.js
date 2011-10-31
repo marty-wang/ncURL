@@ -19,11 +19,11 @@ program
 
 var args = program.args;
 if (args.length <= 0) {
-    console.log("No URL specified!");
+    console.error("No URL specified!");
     return;
 }
 
-// "http://www.lopers.net/students/p/pedersendm/images/USA%20Map%20Only.jpg"
+// http://www.lopers.net/students/p/pedersendm/images/USA%20Map%20Only.jpg
 // TODO: need to verfiy if it is legit url
 var targetUrl = args[0];
 var filename = url.parse(targetUrl).pathname.split("/").pop();

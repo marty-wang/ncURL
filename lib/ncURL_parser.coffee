@@ -1,19 +1,36 @@
-STATS = 
-    TotalPercentage   : 0
-    Total             : 1
-    ReceivedPercentage: 2
-    Received          : 3
-    XferdPercentage   : 4
-    Xferd             : 5
-    AverageDload      : 6
-    SpeedUpload       : 7
-    TimeTotal         : 8
-    TimeSpent         : 9
-    TimeLeft          : 10
-    CurrentSpeed      : 11
+STAT_NAMES = [
+    "TotalPercentage",
+    "Total",
+    "ReceivedPercentage",
+    "Received",
+    "XferdPercentage",
+    "Xferd",
+    "AverageDload",
+    "SpeedUpload",
+    "TimeTotal",
+    "TimeSpent",
+    "TimeLeft",
+    "CurrentSpeed"
+]
+
+# STATS = 
+#     TotalPercentage   : 0
+#     Total             : 1
+#     ReceivedPercentage: 2
+#     Received          : 3
+#     XferdPercentage   : 4
+#     Xferd             : 5
+#     AverageDload      : 6
+#     SpeedUpload       : 7
+#     TimeTotal         : 8
+#     TimeSpent         : 9
+#     TimeLeft          : 10
+#     CurrentSpeed      : 11
 
 STATS_COUNT = 0
-STATS_COUNT++ for stat of STATS
+
+STATS = {}
+STATS[stat] = STATS_COUNT++ for stat in STAT_NAMES
 
 STATS_PATTERN = /[a-zA-Z0-9:-]+/g
 
