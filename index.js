@@ -2,6 +2,7 @@
 
 var url = require("url");
 var path = require("path");
+var fs = require("fs");
 
 var colors = require("colors");
 var program = require("commander");
@@ -28,8 +29,11 @@ var targetUrl = args[0];
 var filename = url.parse(targetUrl).pathname.split("/").pop();
 filename = decodeURIComponent(filename);
 
-// TODO: default to user's desktop
-var destDir = __dirname
+var destDir = path.join(process.env['HOME'], "ncURL_downloads");
+if (!path.existsSync(destDir)) {
+    fs.mkdirSync(destDir, 0755);
+}
+
 var output = path.join(destDir, filename);
 
 var download = new ncURL(targetUrl, output);
@@ -44,5 +48,3 @@ download.on("completed", function(output) {
 });
 
 download.start();
-
-console.log(process.cwd());
