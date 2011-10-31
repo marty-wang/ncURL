@@ -47,7 +47,9 @@ class ncURL extends EventEmitter
         self = this
         
         curl.stdout.on "end", () ->
-            console.log "\ndownload is completed"
+            # TODO: need to test if it gets called when failure
+            # if it gets called in success/failure, specify in the event payload
+            self.emit "completed", self._output
 
         curl.stderr.setEncoding "utf8"
         curl.stderr.on "data", (data) ->
