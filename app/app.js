@@ -1,5 +1,5 @@
 (function() {
-  var STATS, VERSION_NUMBER, args, colors, destDir, download, filename, fs, ncURL, output, path, program, targetUrl, url;
+  var STATS, VERSION_NUMBER, args, colors, destDir, download, filename, fs, ncURL, output, packageContent, packageObj, packagePath, path, program, root, targetUrl, url;
   url = require("url");
   path = require("path");
   fs = require("fs");
@@ -7,7 +7,16 @@
   program = require("commander");
   ncURL = require("../lib/ncURL").ncURL;
   STATS = require("../lib/ncURL_parser").STATS;
-  VERSION_NUMBER = "0.0.1";
+  VERSION_NUMBER = "x.x.x";
+  root = path.resolve(__dirname, "..");
+  packagePath = path.join(root, "package.json");
+  try {
+    packageContent = fs.readFileSync(packagePath, "utf8");
+    packageObj = JSON.parse(packageContent);
+    VERSION_NUMBER = packageObj["version"];
+  } catch (e) {
+    console.error("Cannot find version number");
+  }
   program.version(VERSION_NUMBER).option('-o --output <path>', 'specify the destination').parse(process.argv);
   args = program.args;
   if (args.length <= 0) {

@@ -8,7 +8,17 @@ program = require "commander"
 ncURL = require("../lib/ncURL").ncURL
 STATS = require("../lib/ncURL_parser").STATS
 
-VERSION_NUMBER = "0.0.1"
+VERSION_NUMBER = "x.x.x"
+
+root = path.resolve __dirname, ".."
+packagePath = path.join root, "package.json"
+
+try
+    packageContent = fs.readFileSync packagePath, "utf8"
+    packageObj = JSON.parse packageContent
+    VERSION_NUMBER = packageObj["version"]
+catch e
+    console.error "Cannot find version number"
 
 program
     .version(VERSION_NUMBER)
