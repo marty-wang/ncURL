@@ -47,18 +47,18 @@ class ncURL extends EventEmitter
         self = this
         
         curl.stdout.on "end", () ->
-            console.log "stdout end"
+            console.log "\ndownload is completed"
 
         curl.stderr.setEncoding "utf8"
         curl.stderr.on "data", (data) ->
             statsData += data
             arr = statsData.split "\r"
-            lastStatsStr = arr[arr.length-1]
+            lastStatsStr = arr.pop()
             statsInfo = parser.parseStats lastStatsStr, self._statsFilter
             self.emit "statsUpdated", statsInfo if statsInfo?
 
         curl.on "exit", (code)->
-            console.log code
+            console.log "ncurl exits at code #{code}"
 
 
 ### exports ###
