@@ -60,7 +60,7 @@ class ncURL extends EventEmitter
             self.emit "statsUpdated", statsInfo if statsInfo?
 
         curl.on "exit", (code)->
-            console.log "ncurl exits at code #{code}"
+            console.log "\nncurl exits at code #{code}"
 
 
 ### exports ###

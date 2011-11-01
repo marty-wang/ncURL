@@ -1,10 +1,52 @@
 (function() {
-  var destDir, filename, path, targetUrl, url, util;
+  var STATS, VERSION_NUMBER, args, colors, destDir, download, filename, filenameTmp, fs, ncURL, output, outputTmp, packageContent, packageObj, packagePath, path, program, root, targetUrl, url, util;
   url = require("url");
   path = require("path");
-  util = require("../lib/util.js");
+  fs = require("fs");
+  colors = require("colors");
+  program = require("commander");
+  ncURL = require("../lib/ncURL").ncURL;
+  STATS = require("../lib/ncURL_parser").STATS;
+  util = require("../lib/util");
+  VERSION_NUMBER = "x.x.x";
+  root = path.resolve(__dirname, "..");
+  packagePath = path.join(root, "package.json");
+  try {
+    packageContent = fs.readFileSync(packagePath, "utf8");
+    packageObj = JSON.parse(packageContent);
+    VERSION_NUMBER = packageObj["version"];
+  } catch (e) {
+    console.error("Cannot find version number");
+  }
+  program.version(VERSION_NUMBER).option('-o --output <path>', 'specify the destination').parse(process.argv);
+  args = program.args;
+  if (args.length <= 0) {
+    return console.error("No URL specified!");
+  }
   destDir = path.join(process.env['HOME'], "ncURL_downloads");
-  targetUrl = "http://www.lopers.net/students/p/pedersendm/images/USA%20Map%20Only.jpg";
-  filename = decodeURIComponent(url.parse(targetUrl).pathname.split("/").pop());
-  console.log(util.getOutputFilename(destDir, filename));
+  if (!path.existsSync(destDir)) {
+    fs.mkdirSync(destDir, 0755);
+  }
+  targetUrl = args[0];
+  filename = url.parse(targetUrl).pathname.split("/").pop();
+  filename = decodeURIComponent(filename);
+  filename = util.getOutputFilename(destDir, filename);
+  filenameTmp = filename + ".ncurltmp";
+  outputTmp = path.join(destDir, filenameTmp);
+  output = path.join(destDir, filename);
+  download = new ncURL(targetUrl, outputTmp);
+  download.on("statsUpdated", function(info) {
+    var progress;
+    progress = "Progress: " + info[STATS.ReceivedPercentage].green + "%".green + " at Speed: " + info[STATS.AverageDload].green + " with Time " + info[STATS.TimeLeft].green + " left\r";
+    return process.stdout.write(progress);
+  });
+  download.on("completed", function(outputPath) {
+    return fs.rename(outputPath, output, function(err) {
+      if (err != null) {
+        return console.error(("Failed to rename " + filenameTmp + " to " + filename).red);
+      }
+      return console.log("Download is saved at " + output.green);
+    });
+  });
+  download.start();
 }).call(this);
