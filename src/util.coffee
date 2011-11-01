@@ -27,15 +27,19 @@ extractFilename = (filename) ->
     result = [origFilenameBase, filenameExt]
 
 getOutputFilename = (dir, filename) ->
+    extracts = extractFilename filename
+    filenameBase = extracts[0]
+    filenameExt = extracts[1]
     counter = 0
     filePath = path.join dir, filename
+    newFilename = filename
+
     while path.existsSync filePath
-        extracts = extractFilename filename
-        newFilename = extracts[0]+"-"+(++counter)
-        newFilename += ("."+extracts[1]) if extracts[1]?
+        newFilename = filenameBase+"-"+(++counter)
+        newFilename += ("."+filenameExt) if filenameExt?
         filePath = path.join dir, newFilename
 
-    filePath
+    newFilename
 
 fixFilename = (filename, fix = "_") ->
     regEx = /[^0-9a-zA-Z.-_() ]+/g

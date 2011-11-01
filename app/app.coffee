@@ -1,5 +1,5 @@
-# url = require "url"
-# path = require "path"
+url = require "url"
+path = require "path"
 # fs = require "fs"
 
 # colors = require "colors"
@@ -60,8 +60,9 @@
 
 util = require "../lib/util.js"
 
-testDir = "/Users/mo.wang/ncURL_downloads"
-filename = "USA Map Only.jpg"
+destDir = path.join process.env['HOME'], "ncURL_downloads"
+targetUrl = "http://www.lopers.net/students/p/pedersendm/images/USA%20Map%20Only.jpg"
+filename = decodeURIComponent url.parse(targetUrl).pathname.split("/").pop()
 
-console.log util.getOutputFilename testDir, filename
+console.log util.getOutputFilename destDir, filename
             
