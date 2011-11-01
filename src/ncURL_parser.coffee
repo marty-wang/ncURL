@@ -47,15 +47,16 @@ parseStats = (statsStr = "", stats) ->
     return null if not statsArr? or statsArr.length < STATS_COUNT
 
     stats = [0..STATS_COUNT-1] if not stats? or stats.length <= 0
+
+    # ensure that result will contain such info
+    if (stats.indexOf STATS.ReceivedPercentage) < 0
+        stats.push STATS.ReceivedPercentage
+
     info = {}
     for stat in stats
         info[stat] = statsArr[stat] if _isInt(stat) && 0 <= stat < STATS_COUNT
     
-    progress = statsArr[STATS.ReceivedPercentage]
-    {
-        progress: progress
-        info: info
-    }
+    info
 
 ### Private ###
 

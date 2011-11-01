@@ -63,9 +63,9 @@ download.on "end", (result) ->
                     return console.error "Failed to rename #{filenameTmp} to #{filename}".red
                 console.log "Download is saved at " + output.green
         when "incomplete"
-            console.log "Download stops at progress " + "#{result.data.progress}%".yellow
+            console.log "\nDownload stops at progress " + "#{result.data.progress}%".yellow
 
 download.on "exit", (code, signal) ->
     console.log "\nncurl exits at code #{code} signal #{signal}"
 
-download.start();    
+download.start();

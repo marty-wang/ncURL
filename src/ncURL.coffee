@@ -17,7 +17,7 @@ class ncURL extends EventEmitter
 
         @_statsFilter = [
             STATS.Total, 
-            STATS.ReceivedPercentage, 
+            STATS.ReceivedPercentage,
             STATS.Received, 
             STATS.AverageDload,
             STATS.TimeLeft,
@@ -73,10 +73,10 @@ class ncURL extends EventEmitter
                 self.emit "error", lastStatsStr
             else
                 self._hasError = false
-                parseResult = parser.parseStats lastStatsStr, self._statsFilter
-                if parseResult?
-                    self._progress = parseResult.progress
-                    self.emit "statsUpdated", parseResult.info 
+                statsInfo = parser.parseStats lastStatsStr, self._statsFilter
+                if statsInfo?
+                    self._progress = statsInfo[STATS.ReceivedPercentage]
+                    self.emit "statsUpdated", statsInfo 
 
         curl.on "exit", (code, signal)->
             self.emit "exit", code, signal

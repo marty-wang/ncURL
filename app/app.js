@@ -53,7 +53,7 @@
           return console.log("Download is saved at " + output.green);
         });
       case "incomplete":
-        return console.log("Download stops at progress " + ("" + result.data.progress + "%").yellow);
+        return console.log("\nDownload stops at progress " + ("" + result.data.progress + "%").yellow);
     }
   });
   download.on("exit", function(code, signal) {
