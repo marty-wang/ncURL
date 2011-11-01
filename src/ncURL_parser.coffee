@@ -50,8 +50,12 @@ parseStats = (statsStr = "", stats) ->
     info = {}
     for stat in stats
         info[stat] = statsArr[stat] if _isInt(stat) && 0 <= stat < STATS_COUNT
-    info
-
+    
+    progress = statsArr[STATS.ReceivedPercentage]
+    {
+        progress: progress
+        info: info
+    }
 
 ### Private ###
 

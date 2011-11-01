@@ -35,7 +35,6 @@ unless path.existsSync destDir
     fs.mkdirSync destDir, 0755
 
 # http://www.freeusandworldmaps.com/images/USPrintable/USA522letterBWPrint.jpg
-# TODO: need to verfiy if it is legit url
 targetUrl = args[0]
 filename = url.parse(targetUrl).pathname.split("/").pop()
 filename = decodeURIComponent(filename)
@@ -53,11 +52,20 @@ download.on "statsUpdated", (info) ->
                " with Time " + info[STATS.TimeLeft].green + " left\r"
     process.stdout.write progress
 
-download.on "completed", (outputPath) ->
-    fs.rename outputPath, output, (err) ->
-        if err?
-            return console.error "Failed to rename #{filenameTmp} to #{filename}".red
-        console.log "Download is saved at " + output.green
+download.on "error", (error) ->
+    console.error error.red
 
-download.start();
-            
+download.on "end", (result) ->
+    switch result.status
+        when "success"
+            fs.rename result.data.filePath, output, (err) ->
+                if err?
+                    return console.error "Failed to rename #{filenameTmp} to #{filename}".red
+                console.log "Download is saved at " + output.green
+        when "incomplete"
+            console.log "Download stops at progress " + "#{result.data.progress}%".yellow
+
+download.on "exit", (code, signal) ->
+    console.log "\nncurl exits at code #{code} signal #{signal}"
+
+download.start();    

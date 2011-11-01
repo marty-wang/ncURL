@@ -40,13 +40,24 @@
     progress = "Progress: " + info[STATS.ReceivedPercentage].green + "%".green + " at Speed: " + info[STATS.AverageDload].green + " with Time " + info[STATS.TimeLeft].green + " left\r";
     return process.stdout.write(progress);
   });
-  download.on("completed", function(outputPath) {
-    return fs.rename(outputPath, output, function(err) {
-      if (err != null) {
-        return console.error(("Failed to rename " + filenameTmp + " to " + filename).red);
-      }
-      return console.log("Download is saved at " + output.green);
-    });
+  download.on("error", function(error) {
+    return console.error(error.red);
+  });
+  download.on("end", function(result) {
+    switch (result.status) {
+      case "success":
+        return fs.rename(result.data.filePath, output, function(err) {
+          if (err != null) {
+            return console.error(("Failed to rename " + filenameTmp + " to " + filename).red);
+          }
+          return console.log("Download is saved at " + output.green);
+        });
+      case "incomplete":
+        return console.log("Download stops at progress " + ("" + result.data.progress + "%").yellow);
+    }
+  });
+  download.on("exit", function(code, signal) {
+    return console.log("\nncurl exits at code " + code + " signal " + signal);
   });
   download.start();
 }).call(this);

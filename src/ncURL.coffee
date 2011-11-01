@@ -15,18 +15,6 @@ class ncURL extends EventEmitter
         @_url = url
         @_output = output
 
-        # TotalPercentage   : 0
-        # Total             : 1
-        # ReceivedPercentage: 2
-        # Received          : 3
-        # XferdPercentage   : 4
-        # Xferd             : 5
-        # AverageDload      : 6
-        # SpeedUpload       : 7
-        # TimeTotal         : 8
-        # TimeSpent         : 9
-        # TimeLeft          : 10
-        # CurrentSpeed      : 11
         @_statsFilter = [
             STATS.Total, 
             STATS.ReceivedPercentage, 
@@ -35,10 +23,18 @@ class ncURL extends EventEmitter
             STATS.TimeLeft,
             STATS.CurrentSpeed
         ]
+
+        @_curl = null
+        @_hasError = false
+        @_progress = 0
     
     start: ->
         curl = spawn "curl", ["-o", @_output, @_url]
+        @_curl = curl
         _registerEventHandlers.call @, curl
+    
+    stop: ->
+        @_curl.kill()
 
     ### Private ###
     
@@ -47,21 +43,43 @@ class ncURL extends EventEmitter
         statsData = ""
         
         curl.stdout.on "end", () ->
-            # TODO: need to test if it gets called when failure
-            # if it gets called in success/failure, specify in the event payload
-            self.emit "completed", self._output
+            if self._hasError
+                result = 
+                    status: "error"
+            else if self._progress < 100
+                result = 
+                    status: "incomplete"
+                    data: {
+                        progress: self._progress
+                    }                
+            else
+                result =
+                    status: "success"
+                    data: {
+                        filePath: self._output
+                    }
+                     
+            self.emit "end", result
 
         curl.stderr.setEncoding "utf8"
         curl.stderr.on "data", (data) ->
             statsData += data
             arr = statsData.split "\r"
             lastStatsStr = arr.pop()
-            statsInfo = parser.parseStats lastStatsStr, self._statsFilter
-            self.emit "statsUpdated", statsInfo if statsInfo?
 
-        curl.on "exit", (code)->
-            console.log "\nncurl exits at code #{code}"
+            hasError = lastStatsStr.indexOf "\ncurl:"
+            if hasError >= 0
+                self._hasError = true
+                self.emit "error", lastStatsStr
+            else
+                self._hasError = false
+                parseResult = parser.parseStats lastStatsStr, self._statsFilter
+                if parseResult?
+                    self._progress = parseResult.progress
+                    self.emit "statsUpdated", parseResult.info 
 
+        curl.on "exit", (code, signal)->
+            self.emit "exit", code, signal
 
 ### exports ###
 
